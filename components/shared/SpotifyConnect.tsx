@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 export default function SpotifyConnect() {
   const { data: session, status } = useSession()
-  const [topArtists, setTopArtists] = useState<any[] | null>(null)
+  const [topArtists, setTopArtists] = useState<unknown[] | null>(null)
 
   useEffect(() => {
     const getTopArtists = async () => {
@@ -15,6 +15,7 @@ export default function SpotifyConnect() {
           'https://api.spotify.com/v1/me/top/artists',
           {
             headers: {
+              //@ts-expect-error ???
               Authorization: `Bearer ${session.accessToken}`,
             },
           }
