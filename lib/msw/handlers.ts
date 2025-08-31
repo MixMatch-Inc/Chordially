@@ -48,8 +48,7 @@ const FAKE_MATCHES: Match[] = Array.from({ length: 5 }, () => ({
   id: faker.string.uuid(),
   user: createFakeUser(),
 }))
-let FAKE_LOGGED_IN_USER_PROFILE = createFakeUser()
-
+const FAKE_LOGGED_IN_USER_PROFILE = createFakeUser()
 
 const FAKE_MESSAGES: Record<string, Message[]> = FAKE_MATCHES.reduce(
   (acc, match) => {
@@ -118,13 +117,6 @@ export const handlers = [
     return HttpResponse.json(FAKE_MATCHES)
   }),
 
-  http.get('/api/matches/:matchId/messages', async ({ params }) => {
-    const { matchId } = params
-    await delay(400)
-    const messages = FAKE_MESSAGES[matchId as string] || []
-    return HttpResponse.json(messages)
-  }),
-
   http.post('/api/matches/:matchId/messages', async ({ request, params }) => {
     const { matchId } = params
     const { text, tempId } = (await request.json()) as {
@@ -132,6 +124,7 @@ export const handlers = [
       tempId: string
     }
 
+    // Simulate network failure 25% of the time to test rollbacks
     if (Math.random() < 0.25) {
       await delay(1000)
       return new HttpResponse(null, {
@@ -140,22 +133,7 @@ export const handlers = [
       })
     }
 
-     // 7. Handler for getting the current user's profile
-  http.get('/api/profile', async () => {
-    await delay(200)
-    return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
-  }),
-
-   // 8. Handler for updating the user's profile
-  http.patch('/api/profile', async ({ request }) => {
-    const { bio } = (await request.json()) as ProfileUpdateRequest
-
-    // Simulate network failure 30% of the time to test rollbacks
-    if (Math.random() < 0.3) {
-      await delay(1500)
-      return new HttpResponse(null, { status: 500, statusText: 'Server Error' })
-    }
-
+    // This is the correct logic for sending a new message
     const newMessage: Message = {
       id: faker.string.uuid(),
       tempId,
@@ -169,10 +147,29 @@ export const handlers = [
       FAKE_MESSAGES[matchId as string].push(newMessage)
     }
 
-    // Update our fake user and return the updated profile
+    await delay(500)
+    return HttpResponse.json(newMessage)
+  }), // <-- Correctly closes the POST handler
+
+  // Handler for getting the current user's profile
+  http.get('/api/profile', async () => {
+    await delay(200)
+    return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
+  }), // <-- Correctly closes the GET handler
+
+  // Handler for updating the user's profile
+  http.patch('/api/profile', async ({ request }) => {
+    const { bio } = (await request.json()) as { bio: string } // Assume this is the shape
+
+    // Simulate network failure 30% of the time to test rollbacks
+    if (Math.random() < 0.3) {
+      await delay(1500)
+      return new HttpResponse(null, { status: 500, statusText: 'Server Error' })
+    }
+
+    // This is the correct logic for updating the profile
     FAKE_LOGGED_IN_USER_PROFILE.bio = bio
     await delay(1000)
     return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
-  }),
-  }),
+  }), // <-- Correctly closes the PATCH handler
 ]
