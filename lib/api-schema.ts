@@ -61,3 +61,7 @@ export type Message = {
   timestamp: string
   status?: 'sending' | 'failed'
 }
+
+export type ProfileUpdateRequest = {
+  bio: string
+}
