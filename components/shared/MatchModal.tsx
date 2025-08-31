@@ -7,7 +7,12 @@ import CompatibilityChart from '../charts/CompatibilityChart' // Import the char
 
 export default function MatchModal() {
   // Get the new compatibilityDetails from the store
-  const { isMatchModalOpen, matchedUser, compatibilityDetails, closeMatchModal } = useAuthStore()
+  const {
+    isMatchModalOpen,
+    matchedUser,
+    compatibilityDetails,
+    closeMatchModal,
+  } = useAuthStore()
 
   return (
     <AnimatePresence>
@@ -28,30 +33,39 @@ export default function MatchModal() {
             onClick={(e) => e.stopPropagation()}
           >
             <h1 className='text-4xl font-bold'>It&apso;s a Chord!</h1>
-            <p className='text-lg mb-4'>You and {matchedUser.name} have a strong musical connection.</p>
+            <p className='text-lg mb-4'>
+              You and {matchedUser.name} have a strong musical connection.
+            </p>
 
             {/* Render the chart */}
             <div className='my-4'>
-              <CompatibilityChart details={compatibilityDetails} width={300} height={300} />
+              <CompatibilityChart
+                details={compatibilityDetails}
+                width={300}
+                height={300}
+              />
             </div>
 
             <div className='flex justify-center items-center space-x-4'>
-               <Image
-                  src={useAuthStore.getState().user?.avatarUrl || '/default-avatar.png'}
-                  alt='Your avatar'
-                  width={80}
-                  height={80}
-                  className='rounded-full border-4 border-white'
-                />
-               <Image
-                  src={matchedUser.avatarUrl}
-                  alt={matchedUser.name}
-                  width={80}
-                  height={80}
-                  className='rounded-full border-4 border-white'
-                />
+              <Image
+                src={
+                  useAuthStore.getState().user?.avatarUrl ||
+                  '/default-avatar.png'
+                }
+                alt='Your avatar'
+                width={80}
+                height={80}
+                className='rounded-full border-4 border-white'
+              />
+              <Image
+                src={matchedUser.avatarUrl}
+                alt={matchedUser.name}
+                width={80}
+                height={80}
+                className='rounded-full border-4 border-white'
+              />
             </div>
-            <button 
+            <button
               onClick={closeMatchModal}
               className='mt-6 bg-white text-purple-600 font-bold py-2 px-6 rounded-full'
             >

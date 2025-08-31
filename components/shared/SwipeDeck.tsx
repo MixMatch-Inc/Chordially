@@ -60,7 +60,7 @@ export default function SwipeDeck() {
       }
       queryClient.prefetchQuery({
         queryKey: ['potentialMatches'],
-        queryFn: fetchPotentialMatches
+        queryFn: fetchPotentialMatches,
       })
     },
     onError: (error) => {

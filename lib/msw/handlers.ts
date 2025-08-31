@@ -87,40 +87,45 @@ export const handlers = [
     return HttpResponse.json({ users })
   }),
 
- http.post('/api/swipes', async ({ request }) => {
-  await delay(200)
+  http.post('/api/swipes', async ({ request }) => {
+    await delay(200)
 
-  const swipeData = await request.json()
-  console.log('Swipe Action Recorded (Mock):', swipeData)
+    const swipeData = await request.json()
+    console.log('Swipe Action Recorded (Mock):', swipeData)
 
-  const isMatch = Math.random() < 0.3 // Increased match chance for easier testing
-  const direction = (swipeData as any)?.direction
+    const isMatch = Math.random() < 0.3 // Increased match chance for easier testing
+    const direction = (swipeData as any)?.direction
 
-  let response: SwipeResponse
+    let response: SwipeResponse
 
-  if (direction === 'right' && isMatch) {
-    // Generate fake compatibility data for the chart
-    const compatibilityDetails: CompatibilityDetails = {
-      genre: { score: faker.number.int({ min: 60, max: 95 }), overlap: [faker.music.genre(), faker.music.genre()] },
-      era: { score: faker.number.int({ min: 50, max: 85 }) },
-      artist: { score: faker.number.int({ min: 70, max: 100 }), overlap: [faker.person.fullName()] },
-      obscurity: { score: faker.number.int({ min: 40, max: 75 }) },
+    if (direction === 'right' && isMatch) {
+      // Generate fake compatibility data for the chart
+      const compatibilityDetails: CompatibilityDetails = {
+        genre: {
+          score: faker.number.int({ min: 60, max: 95 }),
+          overlap: [faker.music.genre(), faker.music.genre()],
+        },
+        era: { score: faker.number.int({ min: 50, max: 85 }) },
+        artist: {
+          score: faker.number.int({ min: 70, max: 100 }),
+          overlap: [faker.person.fullName()],
+        },
+        obscurity: { score: faker.number.int({ min: 40, max: 75 }) },
+      }
+
+      response = {
+        isMatch: true,
+        matchId: faker.string.uuid(),
+        compatibilityDetails, // Add the new data to the response
+      }
+    } else {
+      response = {
+        isMatch: false,
+      }
     }
 
-    response = {
-      isMatch: true,
-      matchId: faker.string.uuid(),
-      compatibilityDetails, // Add the new data to the response
-    }
-  } else {
-    response = {
-      isMatch: false,
-    }
-  }
-
-  return HttpResponse.json(response)
-}),
-
+    return HttpResponse.json(response)
+  }),
 
   http.get('/api/matches', async () => {
     await delay(300)
