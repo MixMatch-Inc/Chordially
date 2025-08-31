@@ -93,15 +93,30 @@ export const handlers = [
     const swipeData = await request.json()
     console.log('Swipe Action Recorded (Mock):', swipeData)
 
-    const isMatch = Math.random() < 0.2
-    const direction = (swipeData as HandlerOptions)?.direction
+    const isMatch = Math.random() < 0.3 // Increased match chance for easier testing
+    const direction = (swipeData as any)?.direction
 
     let response: SwipeResponse
 
     if (direction === 'right' && isMatch) {
+      // Generate fake compatibility data for the chart
+      const compatibilityDetails: CompatibilityDetails = {
+        genre: {
+          score: faker.number.int({ min: 60, max: 95 }),
+          overlap: [faker.music.genre(), faker.music.genre()],
+        },
+        era: { score: faker.number.int({ min: 50, max: 85 }) },
+        artist: {
+          score: faker.number.int({ min: 70, max: 100 }),
+          overlap: [faker.person.fullName()],
+        },
+        obscurity: { score: faker.number.int({ min: 40, max: 75 }) },
+      }
+
       response = {
         isMatch: true,
         matchId: faker.string.uuid(),
+        compatibilityDetails, // Add the new data to the response
       }
     } else {
       response = {

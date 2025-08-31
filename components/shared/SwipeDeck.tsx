@@ -54,10 +54,10 @@ export default function SwipeDeck() {
   const swipeMutation = useMutation({
     mutationFn: postSwipe,
     onSuccess: ({ res, swipedUser }) => {
-      if (res.isMatch) {
-        openMatchModal(swipedUser)
+      // Check for match and the new details payload
+      if (res.isMatch && res.compatibilityDetails) {
+        openMatchModal(swipedUser, res.compatibilityDetails) // Pass details to the store
       }
-
       queryClient.prefetchQuery({
         queryKey: ['potentialMatches'],
         queryFn: fetchPotentialMatches,
