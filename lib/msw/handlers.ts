@@ -48,6 +48,8 @@ const FAKE_MATCHES: Match[] = Array.from({ length: 5 }, () => ({
   id: faker.string.uuid(),
   user: createFakeUser(),
 }))
+let FAKE_LOGGED_IN_USER_PROFILE = createFakeUser()
+
 
 const FAKE_MESSAGES: Record<string, Message[]> = FAKE_MATCHES.reduce(
   (acc, match) => {
@@ -138,6 +140,22 @@ export const handlers = [
       })
     }
 
+     // 7. Handler for getting the current user's profile
+  http.get('/api/profile', async () => {
+    await delay(200)
+    return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
+  }),
+
+   // 8. Handler for updating the user's profile
+  http.patch('/api/profile', async ({ request }) => {
+    const { bio } = (await request.json()) as ProfileUpdateRequest
+
+    // Simulate network failure 30% of the time to test rollbacks
+    if (Math.random() < 0.3) {
+      await delay(1500)
+      return new HttpResponse(null, { status: 500, statusText: 'Server Error' })
+    }
+
     const newMessage: Message = {
       id: faker.string.uuid(),
       tempId,
@@ -151,7 +169,10 @@ export const handlers = [
       FAKE_MESSAGES[matchId as string].push(newMessage)
     }
 
-    await delay(500)
-    return HttpResponse.json(newMessage)
+    // Update our fake user and return the updated profile
+    FAKE_LOGGED_IN_USER_PROFILE.bio = bio
+    await delay(1000)
+    return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
+  }),
   }),
 ]
