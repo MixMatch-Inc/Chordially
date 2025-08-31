@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useSession, signIn, signOut } from 'next-auth/react'
@@ -45,7 +46,7 @@ export default function SpotifyConnect() {
           <h2 className='text-2xl font-semibold mb-4'>Your Top 5 Artists:</h2>
           {topArtists ? (
             <ul>
-              {topArtists.slice(0, 5).map((artist) => (
+              {topArtists.slice(0, 5).map((artist: any) => (
                 <li key={artist.id} className='mb-2'>
                   {artist.name}
                 </li>

@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay } from 'msw'
+import { http, HttpResponse, delay, Match, Message } from 'msw'
 import { faker } from '@faker-js/faker'
 import type {
   UserProfile,
@@ -44,6 +44,31 @@ const createFakeUser = (): UserProfile => {
   }
 }
 
+const FAKE_MATCHES: Match[] = Array.from({ length: 5 }, () => ({
+  id: faker.string.uuid(),
+  user: createFakeUser(),
+}))
+
+const FAKE_MESSAGES: Record<string, Message[]> = FAKE_MATCHES.reduce(
+  (acc, match) => {
+    acc[match.id] = Array.from(
+      { length: faker.number.int({ min: 5, max: 15 }) },
+      (_, i) => {
+        const isMe = i % 2 === 0
+        return {
+          id: faker.string.uuid(),
+          matchId: match.id,
+          senderId: isMe ? 'me' : match.user.id,
+          text: faker.lorem.sentence(),
+          timestamp: faker.date.past().toISOString(),
+        }
+      }
+    )
+    return acc
+  },
+  {} as Record<string, Message[]>
+)
+
 export const handlers = [
   http.post('/api/auth/login', async () => {
     await delay(300)
@@ -84,5 +109,49 @@ export const handlers = [
     }
 
     return HttpResponse.json(response)
+  }),
+
+  http.get('/api/matches', async () => {
+    await delay(300)
+    return HttpResponse.json(FAKE_MATCHES)
+  }),
+
+  http.get('/api/matches/:matchId/messages', async ({ params }) => {
+    const { matchId } = params
+    await delay(400)
+    const messages = FAKE_MESSAGES[matchId as string] || []
+    return HttpResponse.json(messages)
+  }),
+
+  http.post('/api/matches/:matchId/messages', async ({ request, params }) => {
+    const { matchId } = params
+    const { text, tempId } = (await request.json()) as {
+      text: string
+      tempId: string
+    }
+
+    if (Math.random() < 0.25) {
+      await delay(1000)
+      return new HttpResponse(null, {
+        status: 500,
+        statusText: 'Network Error',
+      })
+    }
+
+    const newMessage: Message = {
+      id: faker.string.uuid(),
+      tempId,
+      matchId: matchId as string,
+      senderId: 'me',
+      text,
+      timestamp: new Date().toISOString(),
+    }
+
+    if (FAKE_MESSAGES[matchId as string]) {
+      FAKE_MESSAGES[matchId as string].push(newMessage)
+    }
+
+    await delay(500)
+    return HttpResponse.json(newMessage)
   }),
 ]
