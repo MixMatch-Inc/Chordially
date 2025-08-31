@@ -7,7 +7,7 @@ interface AuthState {
   isAuthenticated: boolean
   selectedMatchId: string | null
   messageQueue: Message[]
-
+  compatibilityDetails: CompatibilityDetails | null
   isMatchModalOpen: boolean
   matchedUser: UserProfile | null
   login: (user: UserProfile, token: string) => void
@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   matchedUser: null,
   selectedMatchId: null,
   messageQueue: [],
+  compatibilityDetails: null,
 
   login: (user, token) =>
     set({
@@ -52,12 +53,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({
       isMatchModalOpen: true,
       matchedUser: user,
+      compatibilityDetails: details,
     }),
-
   closeMatchModal: () =>
     set({
       isMatchModalOpen: false,
       matchedUser: null,
+      compatibilityDetails: null,
     }),
 
   selectMatch: (matchId) => set({ selectedMatchId: matchId }),

@@ -37,11 +37,6 @@ export type SwipeRequest = {
   direction: 'left' | 'right'
 }
 
-export type SwipeResponse = {
-  isMatch: boolean
-  matchId?: string
-}
-
 export type LoginResponse = {
   token: string
   user: UserProfile
@@ -64,4 +59,17 @@ export type Message = {
 
 export type ProfileUpdateRequest = {
   bio: string
+}
+export type CompatibilityDetails = {
+  genre: { score: number; overlap: string[] }
+  era: { score: number }
+  artist: { score: number; overlap: string[] }
+  obscurity: { score: number }
+}
+
+export type SwipeResponse = {
+  isMatch: boolean
+  matchId?: string
+  // Add the new compatibility details
+  compatibilityDetails?: CompatibilityDetails
 }
