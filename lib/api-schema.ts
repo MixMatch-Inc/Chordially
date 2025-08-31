@@ -46,3 +46,18 @@ export type LoginResponse = {
   token: string
   user: UserProfile
 }
+
+export type Match = {
+  id: string
+  user: UserProfile
+}
+
+export type Message = {
+  id: string
+  tempId?: string
+  matchId: string
+  senderId: string
+  text: string
+  timestamp: string
+  status?: 'sending' | 'failed'
+}
