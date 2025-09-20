@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from 'next-auth'
 import SpotifyProvider from 'next-auth/providers/spotify'
-import type { JWT } from 'next-auth/jwt'
-import type { Account, User } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
+import { Account, User } from 'next-auth'
 
 const SPOTIFY_SCOPES = [
   'user-read-email',
@@ -36,7 +35,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       ...token,
       accessToken: refreshedTokens.access_token,
       accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
     }
   } catch (error) {
     console.error('Error refreshing access token', error)
@@ -55,6 +54,7 @@ export const authOptions = {
       authorization: `https://accounts.spotify.com/authorize?scope=${SPOTIFY_SCOPES}`,
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({
       token,
@@ -90,7 +90,6 @@ export const authOptions = {
   },
 }
 
-//@ts-expect-error ???
 const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }

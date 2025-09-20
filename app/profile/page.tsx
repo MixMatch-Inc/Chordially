@@ -1,95 +1,50 @@
 'use client'
 
-import { proofOfFandomContract } from '@/lib/contracts'
-import {
-  useAccount,
-  useReadContract,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from 'wagmi'
-import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
+import type { UserProfile } from '@/lib/api-schema'
+import ProfileForm from '@/components/profile/ProfileForm'
+import ContractDemo from '@/components/web3/ContractDemo'
 
-export default function ContractDemo() {
-  const { address, isConnected } = useAccount()
-  const [minted, setMinted] = useState(false)
+const fetchProfile = async (): Promise<UserProfile> => {
+  const res = await fetch('/api/profile')
+  if (!res.ok) throw new Error('Failed to fetch profile')
+  return res.json()
+}
 
-  const { data: balance, isLoading: isBalanceLoading } = useReadContract({
-    ...proofOfFandomContract,
-    functionName: 'balanceOf',
-    args: [address!],
-    query: {
-      enabled: isConnected,
+export default function ProfilePage() {
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect('/')
     },
   })
 
-  const { data: hash, writeContract, isPending } = useWriteContract()
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: fetchProfile,
+  })
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    })
-
-  const handleMint = () => {
-    writeContract({
-      ...proofOfFandomContract,
-      functionName: 'mint',
-      args: [],
-    })
-  }
-
-  if (isConfirmed && !minted) {
-    setMinted(true)
-  }
-
-  if (!isConnected) {
+  if (status === 'loading' || isLoading) {
     return (
-      <p className='text-center text-gray-500'>
-        Please connect your wallet to interact with the contract.
-      </p>
+      <div className='flex h-screen items-center justify-center'>
+        Loading Profile...
+      </div>
     )
   }
 
   return (
-    <div className='p-6 border rounded-lg space-y-4'>
-      <h3 className='text-xl font-bold'>Proof of Fandom Contract</h3>
+    <main className='container mx-auto max-w-2xl py-12'>
+      <div>
+        <h1 className='text-3xl font-bold mb-8'>Edit Your Profile</h1>
+        {profile && <ProfileForm profile={profile} />}
+      </div>
 
       <div>
-        <p>Your Fandom Token Balance:</p>
-        {isBalanceLoading ? (
-          <span className='text-gray-400'>Loading...</span>
-        ) : (
-          <span className='text-2xl font-mono'>
-            {balance?.toString() ?? '0'}
-          </span>
-        )}
+        <h2 className='text-2xl font-bold mb-4'>Web3 Contract Interaction</h2>
+        <ContractDemo />
       </div>
-
-      <div className='flex flex-col items-start space-y-2'>
-        <button
-          onClick={handleMint}
-          disabled={isPending || isConfirming}
-          className='bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400'
-        >
-          {isPending
-            ? 'Check Wallet...'
-            : isConfirming
-              ? 'Minting...'
-              : 'Mint a Fandom Token'}
-        </button>
-        {hash && (
-          <p className='text-sm text-gray-500'>
-            Transaction Hash: {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
-          </p>
-        )}
-        {minted && (
-          <p className='text-green-500 font-bold'>Minted Successfully!</p>
-        )}
-      </div>
-      <p className='text-xs text-gray-400'>
-        Note: This interacts with a dummy contract address. The transaction will
-        be sent but is expected to fail on-chain. This demo is to verify the
-        frontend flow.
-      </p>
-    </div>
+    </main>
   )
 }

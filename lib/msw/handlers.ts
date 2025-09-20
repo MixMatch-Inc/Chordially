@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay } from 'msw'
+import { http, HttpResponse, delay, Match, Message } from 'msw'
 import { faker } from '@faker-js/faker'
 import type {
   UserProfile,
@@ -44,6 +44,32 @@ const createFakeUser = (): UserProfile => {
   }
 }
 
+const FAKE_MATCHES: Match[] = Array.from({ length: 5 }, () => ({
+  id: faker.string.uuid(),
+  user: createFakeUser(),
+}))
+const FAKE_LOGGED_IN_USER_PROFILE = createFakeUser()
+
+const FAKE_MESSAGES: Record<string, Message[]> = FAKE_MATCHES.reduce(
+  (acc, match) => {
+    acc[match.id] = Array.from(
+      { length: faker.number.int({ min: 5, max: 15 }) },
+      (_, i) => {
+        const isMe = i % 2 === 0
+        return {
+          id: faker.string.uuid(),
+          matchId: match.id,
+          senderId: isMe ? 'me' : match.user.id,
+          text: faker.lorem.sentence(),
+          timestamp: faker.date.past().toISOString(),
+        }
+      }
+    )
+    return acc
+  },
+  {} as Record<string, Message[]>
+)
+
 export const handlers = [
   http.post('/api/auth/login', async () => {
     await delay(300)
@@ -67,15 +93,30 @@ export const handlers = [
     const swipeData = await request.json()
     console.log('Swipe Action Recorded (Mock):', swipeData)
 
-    const isMatch = Math.random() < 0.2
-    const direction = (swipeData as HandlerOptions)?.direction
+    const isMatch = Math.random() < 0.3 // Increased match chance for easier testing
+    const direction = (swipeData as any)?.direction
 
     let response: SwipeResponse
 
     if (direction === 'right' && isMatch) {
+      // Generate fake compatibility data for the chart
+      const compatibilityDetails: CompatibilityDetails = {
+        genre: {
+          score: faker.number.int({ min: 60, max: 95 }),
+          overlap: [faker.music.genre(), faker.music.genre()],
+        },
+        era: { score: faker.number.int({ min: 50, max: 85 }) },
+        artist: {
+          score: faker.number.int({ min: 70, max: 100 }),
+          overlap: [faker.person.fullName()],
+        },
+        obscurity: { score: faker.number.int({ min: 40, max: 75 }) },
+      }
+
       response = {
         isMatch: true,
         matchId: faker.string.uuid(),
+        compatibilityDetails, // Add the new data to the response
       }
     } else {
       response = {
@@ -85,4 +126,65 @@ export const handlers = [
 
     return HttpResponse.json(response)
   }),
+
+  http.get('/api/matches', async () => {
+    await delay(300)
+    return HttpResponse.json(FAKE_MATCHES)
+  }),
+
+  http.post('/api/matches/:matchId/messages', async ({ request, params }) => {
+    const { matchId } = params
+    const { text, tempId } = (await request.json()) as {
+      text: string
+      tempId: string
+    }
+
+    // Simulate network failure 25% of the time to test rollbacks
+    if (Math.random() < 0.25) {
+      await delay(1000)
+      return new HttpResponse(null, {
+        status: 500,
+        statusText: 'Network Error',
+      })
+    }
+
+    // This is the correct logic for sending a new message
+    const newMessage: Message = {
+      id: faker.string.uuid(),
+      tempId,
+      matchId: matchId as string,
+      senderId: 'me',
+      text,
+      timestamp: new Date().toISOString(),
+    }
+
+    if (FAKE_MESSAGES[matchId as string]) {
+      FAKE_MESSAGES[matchId as string].push(newMessage)
+    }
+
+    await delay(500)
+    return HttpResponse.json(newMessage)
+  }), // <-- Correctly closes the POST handler
+
+  // Handler for getting the current user's profile
+  http.get('/api/profile', async () => {
+    await delay(200)
+    return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
+  }), // <-- Correctly closes the GET handler
+
+  // Handler for updating the user's profile
+  http.patch('/api/profile', async ({ request }) => {
+    const { bio } = (await request.json()) as { bio: string } // Assume this is the shape
+
+    // Simulate network failure 30% of the time to test rollbacks
+    if (Math.random() < 0.3) {
+      await delay(1500)
+      return new HttpResponse(null, { status: 500, statusText: 'Server Error' })
+    }
+
+    // This is the correct logic for updating the profile
+    FAKE_LOGGED_IN_USER_PROFILE.bio = bio
+    await delay(1000)
+    return HttpResponse.json(FAKE_LOGGED_IN_USER_PROFILE)
+  }), // <-- Correctly closes the PATCH handler
 ]
