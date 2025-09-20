@@ -28,8 +28,10 @@ export default function TippingDemo() {
   return (
     <div className='p-6 border rounded-lg space-y-4'>
       <h3 className='text-xl font-bold'>Tip an Artist (Demo)</h3>
-      <p className='text-sm text-gray-500'>See the FTSO in action by calculating a tip's value in real-time.</p>
-      
+      <p className='text-sm text-gray-500'>
+        See the FTSO in action by calculating a tip's value in real-time.
+      </p>
+
       <div className='flex items-center gap-4'>
         <input
           type='number'
@@ -42,7 +44,9 @@ export default function TippingDemo() {
       </div>
 
       <div className='p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center'>
-        <p className='text-gray-500 dark:text-gray-400'>Equivalent Value (USD)</p>
+        <p className='text-gray-500 dark:text-gray-400'>
+          Equivalent Value (USD)
+        </p>
         <p className='text-3xl font-bold'>${usdValue.toFixed(2)}</p>
         <div className='mt-2'>
           <FtsoPriceFeed symbol='SGB' />

@@ -9,7 +9,11 @@ interface FtsoPriceFeedProps {
 }
 
 export default function FtsoPriceFeed({ symbol }: FtsoPriceFeedProps) {
-  const { data: priceData, isLoading, isError } = useReadContract({
+  const {
+    data: priceData,
+    isLoading,
+    isError,
+  } = useReadContract({
     ...priceSubmitterContractSGB,
     functionName: 'getPrice',
     args: [symbol],
@@ -35,7 +39,8 @@ export default function FtsoPriceFeed({ symbol }: FtsoPriceFeedProps) {
   return (
     <div className='text-sm'>
       <p>
-        Live Price: <span className='font-bold text-green-500'>${price.toFixed(5)}</span>
+        Live Price:{' '}
+        <span className='font-bold text-green-500'>${price.toFixed(5)}</span>
       </p>
       <p className='text-xs text-gray-500'>
         Last Updated: {timestamp.toLocaleTimeString()}
