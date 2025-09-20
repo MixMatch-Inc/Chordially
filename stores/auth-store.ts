@@ -1,5 +1,10 @@
 import { create } from 'zustand'
-import type { Message, UserProfile } from '@/lib/api-schema'
+import type {
+  CompatibilityDetails,
+  Message,
+  UserProfile,
+} from '@/lib/api-schema'
+import { details } from 'framer-motion/client'
 
 interface AuthState {
   user: UserProfile | null
@@ -10,6 +15,7 @@ interface AuthState {
   compatibilityDetails: CompatibilityDetails | null
   isMatchModalOpen: boolean
   matchedUser: UserProfile | null
+  isFandomModalOpen: boolean
   login: (user: UserProfile, token: string) => void
   logout: () => void
 
@@ -23,6 +29,8 @@ interface AuthState {
     tempId: string,
     status: 'sending' | 'failed'
   ) => void
+  openFandomModal: (user: UserProfile, details: CompatibilityDetails) => void
+  closeFandomModal: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -34,6 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   selectedMatchId: null,
   messageQueue: [],
   compatibilityDetails: null,
+  isFandomModalOpen: false,
 
   login: (user, token) =>
     set({
@@ -80,4 +89,20 @@ export const useAuthStore = create<AuthState>((set) => ({
         m.tempId === tempId ? { ...m, status } : m
       ),
     })),
+
+  openFandomModal: (user, details) =>
+    set({
+      isFandomModalOpen: true,
+
+      matchedUser: user,
+      compatibilityDetails: details,
+    }),
+
+  closeFandomModal: () =>
+    set({
+      isFandomModalOpen: false,
+
+      matchedUser: null,
+      compatibilityDetails: null,
+    }),
 }))

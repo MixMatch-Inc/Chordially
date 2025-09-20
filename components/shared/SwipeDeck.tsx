@@ -41,7 +41,7 @@ const postSwipe = async (
 export default function SwipeDeck() {
   const [users, setUsers] = useState<UserProfile[]>([])
   const queryClient = useQueryClient()
-  const openMatchModal = useAuthStore((state) => state.openMatchModal)
+  const { openMatchModal, openFandomModal } = useAuthStore()
 
   const { isLoading, isError } = useQuery({
     queryKey: ['potentialMatches'],
@@ -54,17 +54,18 @@ export default function SwipeDeck() {
   const swipeMutation = useMutation({
     mutationFn: postSwipe,
     onSuccess: ({ res, swipedUser }) => {
-      // Check for match and the new details payload
       if (res.isMatch && res.compatibilityDetails) {
-        openMatchModal(swipedUser, res.compatibilityDetails) // Pass details to the store
+        if (res.isFandomMatch) {
+          openFandomModal(swipedUser, res.compatibilityDetails)
+        } else {
+          openMatchModal(swipedUser, res.compatibilityDetails)
+        }
       }
+
       queryClient.prefetchQuery({
         queryKey: ['potentialMatches'],
         queryFn: fetchPotentialMatches,
       })
-    },
-    onError: (error) => {
-      console.error('Swipe mutation failed:', error)
     },
   })
 
