@@ -6,6 +6,9 @@ import { redirect } from 'next/navigation'
 import type { UserProfile } from '@/lib/api-schema'
 import ProfileForm from '@/components/profile/ProfileForm'
 import ContractDemo from '@/components/web3/ContractDemo'
+import ContractDemo from '@/components/web3/ContractDemo'
+import VipBadge from '@/components/web3/VipBadge' // Import the new badge
+
 
 const fetchProfile = async (): Promise<UserProfile> => {
   const res = await fetch('/api/profile')
@@ -34,13 +37,17 @@ export default function ProfilePage() {
     )
   }
 
-  return (
-    <main className='container mx-auto max-w-2xl py-12'>
+    return (
+    <main className='container mx-auto max-w-2xl py-12 space-y-12'>
       <div>
-        <h1 className='text-3xl font-bold mb-8'>Edit Your Profile</h1>
+        <div className='flex items-center gap-4 mb-8'>
+          <h1 className='text-3xl font-bold'>Edit Your Profile</h1>
+          {/* Add the VipBadge right next to the title */}
+          <VipBadge />
+        </div>
         {profile && <ProfileForm profile={profile} />}
       </div>
-
+      
       <div>
         <h2 className='text-2xl font-bold mb-4'>Web3 Contract Interaction</h2>
         <ContractDemo />
