@@ -7,7 +7,8 @@ import type { UserProfile } from '@/lib/api-schema'
 import ProfileForm from '@/components/profile/ProfileForm'
 import ContractDemo from '@/components/web3/ContractDemo'
 import ContractDemo from '@/components/web3/ContractDemo'
-import VipBadge from '@/components/web3/VipBadge' // Import the new badge
+import VipBadge from '@/components/web3/VipBadge'
+import TippingDemo from '@/components/web3/TippingDemo'
 
 const fetchProfile = async (): Promise<UserProfile> => {
   const res = await fetch('/api/profile')
@@ -45,6 +46,13 @@ export default function ProfilePage() {
           <VipBadge />
         </div>
         {profile && <ProfileForm profile={profile} />}
+      </div>
+
+      <div>
+        <h2 className='text-2xl font-bold mb-4'>
+          Tipping Demo & FTSO Price Feed
+        </h2>
+        <TippingDemo />
       </div>
 
       <div>
