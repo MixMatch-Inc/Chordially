@@ -70,6 +70,6 @@ export type CompatibilityDetails = {
 export type SwipeResponse = {
   isMatch: boolean
   matchId?: string
-  // Add the new compatibility details
+  isFandomMatch?: boolean
   compatibilityDetails?: CompatibilityDetails
 }

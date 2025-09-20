@@ -99,7 +99,6 @@ export const handlers = [
     let response: SwipeResponse
 
     if (direction === 'right' && isMatch) {
-      // Generate fake compatibility data for the chart
       const compatibilityDetails: CompatibilityDetails = {
         genre: {
           score: faker.number.int({ min: 60, max: 95 }),
@@ -113,10 +112,13 @@ export const handlers = [
         obscurity: { score: faker.number.int({ min: 40, max: 75 }) },
       }
 
+      const isFandomMatch = Math.random() < 0.25
+
       response = {
         isMatch: true,
         matchId: faker.string.uuid(),
-        compatibilityDetails, // Add the new data to the response
+        compatibilityDetails,
+        isFandomMatch,
       }
     } else {
       response = {
