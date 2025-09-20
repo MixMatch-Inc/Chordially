@@ -9,7 +9,9 @@ export default function VipBadge() {
   })
 
   if (isLoading) {
-    return <div className='h-6 w-16 bg-gray-200 rounded-full animate-pulse'></div>
+    return (
+      <div className='h-6 w-16 bg-gray-200 rounded-full animate-pulse'></div>
+    )
   }
 
   if (!hasAccess) {

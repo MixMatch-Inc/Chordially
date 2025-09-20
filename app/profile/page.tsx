@@ -9,7 +9,6 @@ import ContractDemo from '@/components/web3/ContractDemo'
 import ContractDemo from '@/components/web3/ContractDemo'
 import VipBadge from '@/components/web3/VipBadge' // Import the new badge
 
-
 const fetchProfile = async (): Promise<UserProfile> => {
   const res = await fetch('/api/profile')
   if (!res.ok) throw new Error('Failed to fetch profile')
@@ -37,7 +36,7 @@ export default function ProfilePage() {
     )
   }
 
-    return (
+  return (
     <main className='container mx-auto max-w-2xl py-12 space-y-12'>
       <div>
         <div className='flex items-center gap-4 mb-8'>
@@ -47,7 +46,7 @@ export default function ProfilePage() {
         </div>
         {profile && <ProfileForm profile={profile} />}
       </div>
-      
+
       <div>
         <h2 className='text-2xl font-bold mb-4'>Web3 Contract Interaction</h2>
         <ContractDemo />
